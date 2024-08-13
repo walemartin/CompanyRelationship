@@ -29,7 +29,11 @@ namespace CompanyRelationship.Controllers
 
             return Ok(company);
         }
-        // GET: api/company/{name}?pageNumber=1&pageSize=10
+        // GET: api/company/{name}?pageNumber=1&pageSize=100
+
+//        REST API endpoint that returns relations of one company(queried by name). All company
+//children, siblings and parents.Companies are ordered by name and one page may return 100
+//rows at max with pagination support.For example if you query relations for organization “ HCL
         [HttpGet("{name}")]
         public async Task<IActionResult> GetCompanyByName(string name, int pageNumber = 1, int pageSize = 100)
         {

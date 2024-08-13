@@ -19,7 +19,7 @@ namespace CompanyRelationship.Interfaces
 
         // Retrieve paginated children of a specific company
         Task<IEnumerable<BranchOfficeDept>> GetPagedChildrenAsync(string companyName, int pageNumber, int pageSize);
-        // Retrieve paginated company and child
+        // Retrieve paginated companies and child
         Task<IEnumerable<Company>> GetCompanyChildrenAsync(int pageNumber, int pageSize);
     }
 }
