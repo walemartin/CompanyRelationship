@@ -3,6 +3,7 @@ using CompanyRelationship.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CompanyRelationship.Migrations
 {
     [DbContext(typeof(CompanyContext))]
-    partial class CompanyContextModelSnapshot : ModelSnapshot
+    [Migration("20240813093729_InitialRelationship")]
+    partial class InitialRelationship
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,9 +34,6 @@ namespace CompanyRelationship.Migrations
 
                     b.Property<string>("CompanyName1")
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
 
                     b.HasKey("Name");
 
@@ -55,9 +55,6 @@ namespace CompanyRelationship.Migrations
                     b.Property<string>("CompanyName")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
-
                     b.HasKey("Name");
 
                     b.HasIndex("BranchOfficeName");
@@ -72,13 +69,7 @@ namespace CompanyRelationship.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
-
                     b.HasKey("Name");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("Companies");
                 });

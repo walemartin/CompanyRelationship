@@ -17,6 +17,11 @@ namespace CompanyRelationship.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            
+
+            modelBuilder.Entity<Company>()
+                .HasIndex(c => c.Name)
+                .IsUnique();
             // Configure the Company entity
             modelBuilder.Entity<Company>()
                 .HasKey(c => c.Name);

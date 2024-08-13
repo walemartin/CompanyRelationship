@@ -9,69 +9,70 @@ namespace CompanyRelationship.Repository
     
     public class CompanyRepository : ICompanyRepository
     {
+      
         private readonly CompanyContext _context;
-        private readonly Company _company;
 
         public CompanyRepository(CompanyContext context)
         {
             _context = context;
         }
-        //REST API endpoint that would allow to Get many Company with relations
-        public Company GetCompany()
+
+        // Retrieve a company by its name, including related data
+        public async Task<Company?> GetCompanyByNameAsync(string name)
         {
-            return new Company
-            {
-                Name = "Global Company",
-                Parents = new List<BranchOffice>
-                {
-                    new BranchOffice
-                    {
-                        Name = "Branch Office 1",
-                        Children = new List<BranchOfficeDept>
-                        {
-                            new BranchOfficeDept { Name = "Dept 1" },
-                            new BranchOfficeDept { Name = "Dept 2" }
-                        }
-                    },
-                    new BranchOffice
-                    {
-                        Name = "Branch Office 2",
-                        Children = new List<BranchOfficeDept>
-                        {
-                            new BranchOfficeDept { Name = "Dept 3" }
-                        }
-                    }
-                }
-            };
+            return await _context.Companies
+                .Include(c => c.Parents).ThenInclude(g=>g.Children)
+                .Include(c => c.Siblings)
+                .Include(c => c.Children)
+                .FirstOrDefaultAsync(c => c.Name.Contains(name));
         }
 
-        //REST API endpoinnt that returns relations of one company(queried by name)
-        public Company OneCompany()
+        // Retrieve all companies
+        public async Task<IEnumerable<Company>> GetAllAsync()
         {
-            return new Company
-            {
-                Name = "HCL developer",
-                Parents = new List<BranchOffice>
-                {
-                    new BranchOffice { Name = "HCL DE" },
-                    new BranchOffice { Name = "HCL NL" }
-                },
-                Siblings = new List<BranchOffice>
-                {
-                    new BranchOffice { Name = "HCL admin" },
-                    new BranchOffice { Name = "HCL support" },
-                    new BranchOffice { Name = "HCL management" }
-                },
-                Children = new List<BranchOfficeDept>
-                {
-                    new BranchOfficeDept { Name = "HCL qa" }
-                }
-            };
+            return await _context.Companies
+                .Include(c => c.Parents).ThenInclude(g => g.Children)
+                .Include(c => c.Siblings)
+                .Include(c => c.Children)
+                .ToListAsync();
         }
 
-        public void AddBranchOffice(BranchOffice branchOffice)
+        // Add a new company to the database
+        public async Task AddAsync(Company company)
         {
-            _company.Parents.Add(branchOffice);
+            await _context.Companies.AddAsync(company);
+        }
+
+       
+
+        // Retrieve a paginated list of children for a specific company
+        public async Task<IEnumerable<BranchOfficeDept>> GetPagedChildrenAsync(string companyName, int pageNumber, int pageSize=100)
+        {
+            var company = await _context.Companies
+                .Include(c => c.Children)
+                .FirstOrDefaultAsync(c => c.Name == companyName);
+
+            if (company == null)
+            {
+                return Enumerable.Empty<BranchOfficeDept>();
+            }
+
+            return company.Children
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+        }
+        // Retrieve a paginated list of companies and children
+        public async Task<IEnumerable<Company>> GetCompanyChildrenAsync(int pageNumber, int pageSize=100)
+        {
+            var company = await GetAllAsync();
+            return company.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+        }
+        // Save changes to the database
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
         }
     }
+
 }

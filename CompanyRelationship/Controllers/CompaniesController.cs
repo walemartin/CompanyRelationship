@@ -9,29 +9,61 @@ namespace CompanyRelationship.Controllers
     [Route("api/[controller]")]
     public class CompaniesController : ControllerBase
     {
-        private readonly ICompanyRepository _repository;
+        private readonly ICompanyService _companyService;
 
-        public CompaniesController(ICompanyRepository repository)
+        public CompaniesController(ICompanyService companyService)
         {
-            _repository = repository;
+            _companyService = companyService;
         }
 
-        [HttpGet]
-        public ActionResult<Company> GetCompany()
+        // GET: api/company?pageNumber=1&pageSize=10
+        [HttpGet()]
+        public async Task<IActionResult> GetAllCompanyRelationships(int pageNumber, int pageSize)
         {
-            return _repository.GetCompany();
+            var company = await _companyService.GetCompanyChildrenAsync(pageNumber, pageSize);
+            if (company == null)
+            {
+                return NotFound($"No records found");
+            }
+            
+
+            return Ok(company);
+        }
+        // GET: api/company/{name}?pageNumber=1&pageSize=10
+        [HttpGet("{name}")]
+        public async Task<IActionResult> GetCompanyByName(string name, int pageNumber = 1, int pageSize = 100)
+        {
+            var company = await _companyService.GetCompanyByNameAsync(name);
+
+            if (company == null)
+            {
+                return NotFound($"Company with name '{name}' not found.");
+            }
+
+            var pagedChildren = await _companyService.GetPagedChildrenAsync(name, pageNumber, pageSize);
+           
+            // Overwrite the full list with the paginated list
+            company.Children = pagedChildren.ToList();
+
+            return Ok(company);
         }
 
+        // POST: api/company
         [HttpPost]
-        public IActionResult AddBranchOffice([FromBody] BranchOffice branchOffice)
+        public async Task<IActionResult> CreateCompany([FromBody] Company company)
         {
-            if (branchOffice == null)
+            if (company == null)
             {
                 return BadRequest();
             }
+            if (await _companyService.GetCompanyByNameAsync(company.Name) != null)
+            {
+                return BadRequest("Company name must be unique.");
+            }
 
-            _repository.AddBranchOffice(branchOffice);
-            return CreatedAtAction(nameof(GetCompany), new { id = branchOffice.Name }, branchOffice);
+            await _companyService.CreateCompanyAsync(company);
+
+            return CreatedAtAction(nameof(GetCompanyByName), new { name = company.Name }, company);
         }
     }
 

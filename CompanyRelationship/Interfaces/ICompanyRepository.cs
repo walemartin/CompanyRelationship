@@ -5,12 +5,21 @@ namespace CompanyRelationship.Interfaces
 {
     public interface ICompanyRepository
     {
-        //Company GetCompany();
-        //Task AddCompanyAsync(Company company);
-        //Task<Company?> GetCompanyByNameAsync(string name);
-        //Task<PaginatedList<Company>> GetCompanyRelationsAsync(string name, int pageNumber, int pageSize);
-        Company GetCompany();
-        Company GetCompanybyName(string name);
-        void AddBranchOffice(BranchOffice branchOffice);
+        // Retrieve a company by its name
+        Task<Company?> GetCompanyByNameAsync(string name);
+
+        // Retrieve all companies
+        Task<IEnumerable<Company>> GetAllAsync();
+
+        // Add a new company
+        Task AddAsync(Company company);
+
+        // Save changes to the database
+        Task SaveChangesAsync();
+
+        // Retrieve paginated children of a specific company
+        Task<IEnumerable<BranchOfficeDept>> GetPagedChildrenAsync(string companyName, int pageNumber, int pageSize);
+        // Retrieve paginated company and child
+        Task<IEnumerable<Company>> GetCompanyChildrenAsync(int pageNumber, int pageSize);
     }
 }

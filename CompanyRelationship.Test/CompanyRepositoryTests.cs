@@ -2,41 +2,79 @@ using CompanyRelationship.Data;
 using CompanyRelationship.Interfaces;
 using CompanyRelationship.Model;
 using CompanyRelationship.Repository;
+using CompanyRelationship.Services;
 using Microsoft.EntityFrameworkCore;
+using Moq;
+using System.Transactions;
 
 namespace CompanyRelationship.Test
 {
     public class CompanyRepositoryTests
     {
-        private readonly ICompanyRepository _repository;
-        private readonly CompanyContext _context;
+        private readonly ICompanyService _companyService;
+      
 
-        
+        public CompanyRepositoryTests(ICompanyService companyService)
+        {
 
-        //[Fact]
-        //public async Task AddCompanyAsync_ShouldAddCompany()
-        //{
-        //    var company = new Company { Name = "TestCompany" };
+            _companyService = companyService;
 
-        //    await _repository.AddCompanyAsync(company);
+           
+        }
 
-        //    var result = await _context.Companies.FirstOrDefaultAsync(c => c.Name == "TestCompany");
-        //    Assert.NotNull(result);
-        //}
+        [Fact]
+        public async Task GetCompanyByNameAsync_ReturnsCompany_WhenCompanyExists()
+        {
+            // Arrange
+            var company = new Company { Name = "HCL" };
+            await _companyService.GetCompanyByNameAsync(company.Name);
+            //await _companyService.SaveChangesAsync();
 
-        //[Fact]
-        //public async Task GetCompanyByNameAsync_ShouldReturnCompanyWithRelations()
-        //{
-        //    var parentCompany = new Company { Name = "ParentCompany" };
-        //    var childCompany = new Company { Name = "ChildCompany", Parents = new List<Company> { parentCompany } };
+            // Act
+            var result = await _companyService.GetCompanyByNameAsync("HCL");
 
-        //    await _repository.AddCompanyAsync(childCompany);
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal("HCL", result.Name);
+        }
 
-        //    var result = await _repository.GetCompanyByNameAsync("ChildCompany");
-        //    Assert.NotNull(result);
-        //    Assert.Single(result.Parents);
-        //    Assert.Equal("ParentCompany", result.Parents.First().Name);
-        //}
+        [Fact]
+        public async Task GetCompanyByNameAsync_ReturnsNull_WhenCompanyDoesNotExist()
+        {
+            // Act
+            var result = await _companyService.GetCompanyByNameAsync("NonExistentCompany");
+
+            // Assert
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task GetCompanyByNameAsync_IncludesRelatedData()
+        {
+            // Arrange
+            var parentCompany = new Company { Name = "Parent Company" };
+            var siblingCompany = new Company { Name = "Sibling Company" };
+            var childDept = new BranchOfficeDept { Name = "Child Dept" };
+
+            var company = new Company
+            {
+                Name = "HCL",
+                Parents = new List<BranchOffice> { new BranchOffice { Name = "Parent Office", Children = new List<BranchOfficeDept> { childDept } } },
+                Siblings = new List<BranchOffice> { new BranchOffice { Name = "Sibling Office" } },
+                Children = new List<BranchOfficeDept> { childDept }
+            };
+
+            await _companyService.CreateCompanyAsync(company);
+            
+
+            // Act
+            var result = await _companyService.GetCompanyByNameAsync("HCL");
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Single(result.Parents);
+            Assert.Single(result.Siblings);
+            Assert.Single(result.Children);
+        }
     }
-
 }

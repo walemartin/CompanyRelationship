@@ -13,12 +13,12 @@
     //}
     public class BranchOfficeDept
     {
-        //public int Id { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
     }
     public class BranchOffice
     {
-        //public int Id { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public List<BranchOfficeDept> Children { get; set; }
 
@@ -30,7 +30,7 @@
 
     public class Company
     {
-        //public int Id { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public List<BranchOffice> Parents { get; set; }
         public List<BranchOffice> Siblings { get; set; }
