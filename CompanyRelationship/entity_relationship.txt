@@ -1,0 +1,16 @@
+﻿public class Child
+    {
+        public string Name { get; set; }
+    }
+
+    public class Parent
+    {
+        public string Name { get; set; }
+        public List<Child> Children { get; set; }
+    }
+
+    public class Root
+    {
+        public string Name { get; set; }
+        public List<Parent> Parents { get; set; }
+    }
